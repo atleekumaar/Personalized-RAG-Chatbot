@@ -1,0 +1,119 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-bg: #0b0c0e;
+  --color-surface: #121316;
+  --color-raised: #191b1f;
+  --color-fg: #ecece8;
+  --color-muted: #8e9198;
+  --color-subtle: #6a6d75;
+  --color-primary: #d7dbe3;
+  --color-primary-fg: #0b0c0e;
+  --color-border: #2a2c32;
+  --color-ok: #86a38c;
+  --color-warn: #c4a574;
+  --color-danger: #c98478;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.13);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --scale-96: 0.96;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html,
+  body,
+  #app {
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-primary) 28%, transparent);
+    color: var(--color-fg);
+  }
+}
+
+@layer utilities {
+  .desk-grain {
+    background-image:
+      radial-gradient(1200px 500px at 50% -10%, rgba(215, 219, 227, 0.05), transparent 55%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 28%);
+  }
+
+  .hairline {
+    box-shadow: var(--shadow-border);
+  }
+
+  .safe-pad-b {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .shimmer-text {
+    background: linear-gradient(
+      90deg,
+      var(--color-muted) 0%,
+      var(--color-fg) 45%,
+      var(--color-muted) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer-sweep 1.6s linear infinite;
+  }
+}
+
+@keyframes shimmer-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-text {
+    animation: none;
+    color: var(--color-muted);
+    background: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

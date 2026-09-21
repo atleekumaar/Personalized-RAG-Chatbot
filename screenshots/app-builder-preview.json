@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Folio",
+      "hasCanvas": false,
+      "bodyTextLen": 502,
+      "bodyTextHash": "9152a66096193de575eeb4576a5daccb4089dcf324a90f408056c210e60445f5",
+      "bodyTextPrefix": "Folio Grounded document Q&A DOCUMENT Q&A Ask only what the page ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Folio",
+      "hasCanvas": false,
+      "bodyTextLen": 384,
+      "bodyTextHash": "9827ed0be7f57613616e74b821768be0a3a3b0e6efc8abfd8bcb4d8b7906eaca",
+      "bodyTextPrefix": "Folio DOCUMENT Q&A Ask only what the page can prove. Upload a PD",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
