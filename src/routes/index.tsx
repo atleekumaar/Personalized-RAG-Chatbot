@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Sparkles } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 import { toast } from "sonner";
 import { Landing } from "@/components/folio/landing";
@@ -77,23 +78,37 @@ function Home() {
 
   return (
     <div
-      className="desk-grain relative flex min-h-dvh flex-col"
+      className="desk-grain relative flex min-h-dvh flex-col bg-bg text-fg"
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4 sm:px-6">
-        <div className="flex items-baseline gap-3">
-          <span className="font-display text-xl tracking-tight text-fg">Folio</span>
-          <span className="hidden text-xs text-subtle sm:inline">
-            Grounded document Q&A
-          </span>
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-border bg-surface/80 px-4 backdrop-blur-md sm:px-6">
+        <div className="flex items-center gap-3">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-fg font-bold text-sm shadow-sm">
+            F
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-xl font-bold tracking-tight text-fg">Folio</span>
+            <span className="hidden text-2xs text-muted sm:inline font-mono tracking-wide uppercase">
+              RAG AI
+            </span>
+          </div>
         </div>
-        {docs.length > 0 ? (
-          <span className="hidden text-xs text-muted md:inline">
-            Answers only from your sources
-          </span>
-        ) : null}
+
+        <div className="flex items-center gap-3">
+          {docs.length > 0 ? (
+            <span className="hidden text-xs text-muted md:inline">
+              Grounded on <span className="font-medium text-fg">{docs.length} source{docs.length > 1 ? "s" : ""}</span>
+            </span>
+          ) : null}
+
+          {/* Top Header Watermark Badge */}
+          <div className="flex items-center gap-1.5 rounded-full border border-border bg-raised/80 px-3 py-1 text-2xs text-muted shadow-sm backdrop-blur">
+            <span className="size-1.5 rounded-full bg-ok animate-pulse" />
+            <span>by <strong className="text-fg font-medium">Atlee Kumaar</strong></span>
+          </div>
+        </div>
       </header>
 
       <input
@@ -126,15 +141,24 @@ function Home() {
         />
       )}
 
+      {/* Floating Bottom-Right Corner Watermark */}
+      <div className="fixed bottom-3 right-3 z-30 pointer-events-none hidden sm:flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface/90 px-2.5 py-1 text-2xs text-subtle shadow-md backdrop-blur">
+        <Sparkles className="size-3 text-primary" />
+        <span>Personalized RAG · <span className="font-semibold text-fg/80">Atlee Kumaar</span></span>
+      </div>
+
       {dragging ? (
         <div
           className={cn(
-            "pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-bg/80",
+            "pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-bg/85 backdrop-blur-sm",
           )}
         >
-          <p className="rounded-xl bg-raised px-6 py-4 font-display text-lg hairline">
-            Drop PDF, Word, or Markdown to add it
-          </p>
+          <div className="rounded-2xl border border-primary/40 bg-raised p-8 text-center shadow-2xl">
+            <p className="font-display text-xl font-medium text-fg">
+              Drop files to add to library
+            </p>
+            <p className="mt-2 text-xs text-muted">Supports PDF, Word (DOCX), Markdown, and TXT</p>
+          </div>
         </div>
       ) : null}
     </div>

@@ -2,26 +2,28 @@
 @import "tw-animate-css";
 
 @theme {
-  --color-bg: #0b0c0e;
-  --color-surface: #121316;
-  --color-raised: #191b1f;
-  --color-fg: #ecece8;
-  --color-muted: #8e9198;
-  --color-subtle: #6a6d75;
-  --color-primary: #d7dbe3;
-  --color-primary-fg: #0b0c0e;
-  --color-border: #2a2c32;
-  --color-ok: #86a38c;
-  --color-warn: #c4a574;
-  --color-danger: #c98478;
-  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+  --color-bg: #090a0d;
+  --color-surface: #0f1116;
+  --color-raised: #161922;
+  --color-fg: #f0f2f5;
+  --color-muted: #9499a6;
+  --color-subtle: #6b7280;
+  --color-primary: #3b82f6;
+  --color-primary-fg: #ffffff;
+  --color-primary-glow: rgba(59, 130, 246, 0.25);
+  --color-border: #1f2430;
+  --color-ok: #10b981;
+  --color-warn: #f59e0b;
+  --color-danger: #ef4444;
+  --font-sans: "Inter", "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader", ui-serif, Georgia, serif;
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
-  --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.13);
+  --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.16);
+  --shadow-glow: 0 0 25px -5px rgba(59, 130, 246, 0.2);
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --scale-96: 0.96;
   --text-2xs: 0.6875rem;
@@ -57,7 +59,7 @@
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--color-primary) 28%, transparent);
+    background: rgba(59, 130, 246, 0.35);
     color: var(--color-fg);
   }
 }
@@ -65,16 +67,37 @@
 @layer utilities {
   .desk-grain {
     background-image:
-      radial-gradient(1200px 500px at 50% -10%, rgba(215, 219, 227, 0.05), transparent 55%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 28%);
+      radial-gradient(800px 400px at 50% 0%, rgba(59, 130, 246, 0.08), transparent 70%),
+      radial-gradient(600px 300px at 80% 20%, rgba(139, 92, 246, 0.05), transparent 60%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 40%);
   }
 
   .hairline {
     box-shadow: var(--shadow-border);
   }
 
+  .hairline-hover:hover {
+    box-shadow: var(--shadow-border-hover);
+  }
+
+  .glow-blue {
+    box-shadow: var(--shadow-glow);
+  }
+
   .safe-pad-b {
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #ffffff 0%, #d1d5db 40%, #9ca3af 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .shimmer-text {
