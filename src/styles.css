@@ -1,7 +1,36 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@theme {
+:root {
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-raised: #f1f5f9;
+  --color-fg: #0f172a;
+  --color-muted: #64748b;
+  --color-subtle: #94a3b8;
+  --color-primary: #2563eb;
+  --color-primary-fg: #ffffff;
+  --color-primary-glow: rgba(37, 99, 235, 0.2);
+  --color-border: #e2e8f0;
+  --color-ok: #059669;
+  --color-warn: #d97706;
+  --color-danger: #dc2626;
+  --font-sans: "Inter", "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader", ui-serif, Georgia, serif;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(0, 0, 0, 0.16);
+  --shadow-glow: 0 0 25px -5px rgba(37, 99, 235, 0.15);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --scale-96: 0.96;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+}
+
+.dark {
   --color-bg: #090a0d;
   --color-surface: #0f1116;
   --color-raised: #161922;
@@ -15,19 +44,9 @@
   --color-ok: #10b981;
   --color-warn: #f59e0b;
   --color-danger: #ef4444;
-  --font-sans: "Inter", "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Newsreader", ui-serif, Georgia, serif;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
   --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
   --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.16);
   --shadow-glow: 0 0 25px -5px rgba(59, 130, 246, 0.2);
-  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --scale-96: 0.96;
-  --text-2xs: 0.6875rem;
-  --text-2xs--line-height: 1rem;
 }
 
 @layer base {
@@ -67,7 +86,7 @@
 @layer utilities {
   .desk-grain {
     background-image:
-      radial-gradient(800px 400px at 50% 0%, rgba(59, 130, 246, 0.08), transparent 70%),
+      radial-gradient(800px 400px at 50% 0%, var(--color-primary-glow), transparent 70%),
       radial-gradient(600px 300px at 80% 20%, rgba(139, 92, 246, 0.05), transparent 60%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 40%);
   }
@@ -89,13 +108,7 @@
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #ffffff 0%, #d1d5db 40%, #9ca3af 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .gradient-accent {
-    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+    background: linear-gradient(135deg, var(--color-fg) 0%, var(--color-muted) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }

@@ -35,6 +35,11 @@ export const Route = createRootRoute({
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
     ],
+    scripts: [
+      {
+        children: `(function(){try{var t=localStorage.getItem("folio_theme");if(t==="light"){document.documentElement.classList.remove("dark");}else{document.documentElement.classList.add("dark");}}catch(e){}})();`,
+      },
+    ],
   }),
   component: RootDocument,
 });

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Sparkles } from "lucide-react";
 import { useRef, useState, type DragEvent } from "react";
 import { toast } from "sonner";
@@ -102,6 +103,9 @@ function Home() {
               Grounded on <span className="font-medium text-fg">{docs.length} source{docs.length > 1 ? "s" : ""}</span>
             </span>
           ) : null}
+
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
 
           {/* Top Header Watermark Badge */}
           <div className="flex items-center gap-1.5 rounded-full border border-border bg-raised/80 px-3 py-1 text-2xs text-muted shadow-sm backdrop-blur">
