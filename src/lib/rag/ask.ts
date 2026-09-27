@@ -120,7 +120,10 @@ function parseModelJson(raw: string): {
 export const askFolio = createServerFn({ method: "POST" })
   .validator((data) => inputSchema.parse(data))
   .handler(async ({ data }): Promise<AskResult> => {
-    const apiKey = process.env.GROQ_API_KEY || process.env.XAI_API_KEY;
+    const apiKey =
+      process.env.GROQ_API_KEY ||
+      process.env.VyaparMitra2 ||
+      process.env.XAI_API_KEY;
     if (!apiKey) {
       return passagesFrom(data.question, data.excerpts);
     }
