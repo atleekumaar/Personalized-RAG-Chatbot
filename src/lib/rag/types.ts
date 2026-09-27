@@ -1,4 +1,4 @@
-export type DocKind = "pdf" | "markdown" | "text" | "sample";
+export type DocKind = "pdf" | "markdown" | "text" | "sample" | "docx" | "url";
 
 export type SourcePage = {
   page: number | null;
@@ -64,3 +64,12 @@ export type AskResult =
       ok: false;
       error: string;
     };
+
+export type ChatSession = {
+  id: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+  messages: ChatMessage[];
+  docIds: string[];
+};

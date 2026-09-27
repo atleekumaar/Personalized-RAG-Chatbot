@@ -1,12 +1,13 @@
-import { ArrowUp, ShieldCheck, ShieldAlert, Files } from "lucide-react";
+import { ArrowUp, Files, Mic, MicOff, ShieldAlert, ShieldCheck, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useSpeechToText, useTextToSpeech } from "@/lib/audio/voice";
 import { askFolio } from "@/lib/rag/ask";
-import { SAMPLE_QUESTIONS } from "@/lib/rag/sample";
 import { expandFollowUpQuery, retrieveChunks } from "@/lib/rag/retrieve";
+import { SAMPLE_QUESTIONS } from "@/lib/rag/sample";
 import type { ChatCitation, ChatMessage, Excerpt } from "@/lib/rag/types";
 import { cn } from "@/lib/utils";
 import { useFolio } from "@/store/folio";
@@ -21,6 +22,12 @@ export function ChatPanel() {
   const setAsking = useFolio((s) => s.setAsking);
   const [draft, setDraft] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
+
+  const { isListening, isSupported: speechSupported, toggleListening } = useSpeechToText((text) => {
+    setDraft(text);
+  });
+
+  const { speakingId, speak, stop } = useTextToSpeech();
 
   const suggestions = useMemo(() => {
     if (docs.some((d) => d.kind === "sample")) return SAMPLE_QUESTIONS;
@@ -37,10 +44,23 @@ export function ChatPanel() {
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages, asking]);
 
+  async function streamTypewriter(assistantId: string, fullText: string) {
+    const words = fullText.split(" ");
+    let current = "";
+    for (let i = 0; i < words.length; i++) {
+      current += (i === 0 ? "" : " ") + words[i];
+      patchMessage(assistantId, { content: current });
+      if (i % 3 === 0) {
+        await new Promise((r) => setTimeout(r, 20));
+      }
+    }
+  }
+
   async function submit(question: string) {
     const trimmed = question.trim();
     if (!trimmed || asking || chunks.length === 0) return;
     setDraft("");
+    stop();
 
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
@@ -73,16 +93,19 @@ export function ChatPanel() {
         toast.error(result.error);
         return;
       }
+
       const used = new Set(result.used);
       const citations: ChatCitation[] = excerpts
         .filter((e) => used.size === 0 || used.has(e.n))
         .map((e) => excerptToCitation(e));
+
       patchMessage(assistantId, {
-        content: result.answer,
         found: result.found,
         mode: result.mode,
         citations: result.found ? citations : citations.slice(0, 3),
       });
+
+      await streamTypewriter(assistantId, result.answer);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong asking Folio.";
@@ -119,7 +142,13 @@ export function ChatPanel() {
         ) : (
           <ol className="mx-auto flex max-w-2xl flex-col gap-5">
             {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} pending={asking} />
+              <MessageBubble
+                key={message.id}
+                message={message}
+                pending={asking}
+                speaking={speakingId === message.id}
+                onSpeak={() => speak(message.id, message.content)}
+              />
             ))}
           </ol>
         )}
@@ -130,11 +159,25 @@ export function ChatPanel() {
         className="safe-pad-b border-t border-border bg-bg/80 px-4 py-3 sm:px-8"
       >
         <div className="mx-auto flex max-w-2xl items-end gap-2 rounded-xl bg-surface p-2 hairline">
+          {speechSupported ? (
+            <Button
+              type="button"
+              variant={isListening ? "danger" : "ghost"}
+              size="icon"
+              onClick={toggleListening}
+              className={cn("size-11 shrink-0", isListening && "animate-pulse")}
+              title={isListening ? "Listening… click to stop" : "Voice input"}
+              aria-label="Voice input"
+            >
+              {isListening ? <MicOff className="size-4" /> : <Mic className="size-4 text-muted" />}
+            </Button>
+          ) : null}
+
           <Textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Ask something in the documents…"
+            placeholder={isListening ? "Listening to your voice…" : "Ask something in the documents…"}
             rows={1}
             maxLength={2000}
             disabled={asking || chunks.length === 0}
@@ -173,8 +216,8 @@ function EmptyChat({
     <div className="mx-auto flex max-w-lg flex-col items-start pt-4 sm:pt-12">
       <p className="font-display text-2xl text-fg">Your library is ready.</p>
       <p className="mt-2 text-sm leading-relaxed text-muted">
-        Ask a question. Folio will retrieve matching passages and refuse
-        anything the pages do not support.
+        Ask a question via text or voice. Folio will retrieve matching passages and stream
+        answers grounded only in your sources.
       </p>
       {suggestions.length > 0 ? (
         <ul className="mt-6 flex w-full flex-col gap-2">
@@ -199,9 +242,13 @@ function EmptyChat({
 function MessageBubble({
   message,
   pending,
+  speaking,
+  onSpeak,
 }: {
   message: ChatMessage;
   pending: boolean;
+  speaking?: boolean;
+  onSpeak?: () => void;
 }) {
   if (message.role === "user") {
     return (
@@ -219,38 +266,55 @@ function MessageBubble({
     <li className="flex justify-start">
       <div className="w-full max-w-2xl rounded-xl rounded-bl-md bg-raised px-4 py-4 hairline">
         {waiting ? (
-          <p className="shimmer-text text-sm">Reading sources…</p>
+          <p className="shimmer-text text-sm">Reading sources & generating answer…</p>
         ) : (
           <>
-            <div className="mb-3">
-              {message.error ? (
-                <Badge tone="danger">
-                  <ShieldAlert className="size-3" />
-                  Could not answer
-                </Badge>
-              ) : message.found === false ? (
-                <Badge tone="warn">
-                  <ShieldAlert className="size-3" />
-                  Not in your documents
-                </Badge>
-              ) : message.mode === "passages" ? (
-                <Badge>
-                  <Files className="size-3" />
-                  Matching passages
-                </Badge>
-              ) : (
-                <Badge tone="ok">
-                  <ShieldCheck className="size-3" />
-                  Grounded
-                </Badge>
-              )}
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                {message.error ? (
+                  <Badge tone="danger">
+                    <ShieldAlert className="size-3" />
+                    Could not answer
+                  </Badge>
+                ) : message.found === false ? (
+                  <Badge tone="warn">
+                    <ShieldAlert className="size-3" />
+                    Not in your documents
+                  </Badge>
+                ) : message.mode === "passages" ? (
+                  <Badge>
+                    <Files className="size-3" />
+                    Matching passages
+                  </Badge>
+                ) : (
+                  <Badge tone="ok">
+                    <ShieldCheck className="size-3" />
+                    Grounded
+                  </Badge>
+                )}
+              </div>
+
+              {message.content && !message.error && onSpeak ? (
+                <button
+                  type="button"
+                  onClick={onSpeak}
+                  className="flex size-7 items-center justify-center rounded-md text-subtle transition-colors hover:bg-bg hover:text-fg"
+                  title={speaking ? "Stop speaking" : "Listen to answer"}
+                  aria-label="Audio read-out"
+                >
+                  {speaking ? <VolumeX className="size-3.5 text-primary" /> : <Volume2 className="size-3.5" />}
+                </button>
+              ) : null}
             </div>
+
             <AnswerBody text={message.content} citations={message.citations ?? []} />
+
             {message.mode === "passages" && message.found ? (
               <p className="mt-3 text-xs text-subtle">
                 Live synthesis is paused. These lines are taken from your files.
               </p>
             ) : null}
+
             {message.citations && message.citations.length > 0 && message.found !== false ? (
               <CitationList citations={message.citations} />
             ) : null}

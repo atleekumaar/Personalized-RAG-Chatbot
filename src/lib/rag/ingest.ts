@@ -1,3 +1,4 @@
+import mammoth from "mammoth";
 import { chunkPages, pagesFromMarkdown } from "./chunk";
 import { MAX_CHARS, MAX_FILE_BYTES } from "./limits";
 import { SAMPLE_DOC_NAME, SAMPLE_MARKDOWN } from "./sample";
@@ -9,10 +10,16 @@ function newId(): string {
   return crypto.randomUUID();
 }
 
-function extKind(file: File): "pdf" | "markdown" | "text" {
+function extKind(file: File): "pdf" | "markdown" | "text" | "docx" {
   const name = file.name.toLowerCase();
   const type = file.type.toLowerCase();
   if (type === "application/pdf" || name.endsWith(".pdf")) return "pdf";
+  if (
+    type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    name.endsWith(".docx")
+  ) {
+    return "docx";
+  }
   if (
     type === "text/markdown" ||
     name.endsWith(".md") ||
@@ -22,7 +29,7 @@ function extKind(file: File): "pdf" | "markdown" | "text" {
     return "markdown";
   }
   if (type === "text/plain" || name.endsWith(".txt")) return "text";
-  throw new Error("Use a PDF, Markdown, or plain text file.");
+  throw new Error("Use a PDF, Word (DOCX), Markdown, or plain text file.");
 }
 
 function pagesToDoc(
@@ -58,14 +65,34 @@ export async function ingestFile(
   }
   const kind = extKind(file);
   const id = newId();
+
   if (kind === "pdf") {
     const { extractPdfPages } = await import("./parse-pdf");
     const pages = await extractPdfPages(await file.arrayBuffer());
     return pagesToDoc(id, file.name, "pdf", pages);
   }
+
+  if (kind === "docx") {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    const text = result.value || "";
+    const pages = pagesFromMarkdown(text);
+    return pagesToDoc(id, file.name, "docx", pages);
+  }
+
   const text = await file.text();
   const pages = pagesFromMarkdown(text);
   return pagesToDoc(id, file.name, kind, pages);
+}
+
+export function ingestUrlContent(
+  url: string,
+  title: string,
+  text: string,
+): { doc: SourceDoc; chunks: Chunk[] } {
+  const id = newId();
+  const pages = pagesFromMarkdown(text);
+  return pagesToDoc(id, `${title} (${new URL(url).hostname})`, "url", pages);
 }
 
 export function ingestSample(): { doc: SourceDoc; chunks: Chunk[] } {

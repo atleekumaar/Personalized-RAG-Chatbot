@@ -99,7 +99,7 @@ function Home() {
       <input
         ref={fileRef}
         type="file"
-        accept=".pdf,.md,.markdown,.txt,application/pdf,text/markdown,text/plain"
+        accept=".pdf,.docx,.md,.markdown,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain"
         multiple
         className="sr-only"
         onChange={(e) => void handleFiles(e.target.files)}
@@ -114,6 +114,7 @@ function Home() {
           libraryOpen={libraryOpen}
           onUpload={openPicker}
           onSample={handleSample}
+          onAddDoc={addDoc}
           onRemove={removeDoc}
           onClear={clearAll}
           onOpenLibrary={setLibraryOpen}
@@ -127,7 +128,7 @@ function Home() {
           )}
         >
           <p className="rounded-xl bg-raised px-6 py-4 font-display text-lg hairline">
-            Drop PDF or Markdown to add it
+            Drop PDF, Word, or Markdown to add it
           </p>
         </div>
       ) : null}
