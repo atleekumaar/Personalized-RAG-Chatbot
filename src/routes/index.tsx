@@ -106,7 +106,12 @@ function Home() {
       />
 
       {docs.length === 0 ? (
-        <Landing onUpload={openPicker} onSample={handleSample} busy={ingesting} />
+        <Landing
+          onUpload={openPicker}
+          onSample={handleSample}
+          onAddDoc={addDoc}
+          busy={ingesting}
+        />
       ) : (
         <Workspace
           docs={docs}
