@@ -1,4 +1,3 @@
-import mammoth from "mammoth";
 import { chunkPages, pagesFromMarkdown } from "./chunk";
 import { MAX_CHARS, MAX_FILE_BYTES } from "./limits";
 import { SAMPLE_DOC_NAME, SAMPLE_MARKDOWN } from "./sample";
@@ -73,10 +72,8 @@ export async function ingestFile(
   }
 
   if (kind === "docx") {
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    const text = result.value || "";
-    const pages = pagesFromMarkdown(text);
+    const { extractDocxPages } = await import("./parse-docx");
+    const pages = await extractDocxPages(await file.arrayBuffer());
     return pagesToDoc(id, file.name, "docx", pages);
   }
 
