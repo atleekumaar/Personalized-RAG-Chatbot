@@ -77,7 +77,6 @@ To run the application locally or deploy on Vercel, set the following environmen
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 ```
-*(Also supports `VyaparMitra2` and `XAI_API_KEY` for backwards compatibility)*
 
 ---
 
