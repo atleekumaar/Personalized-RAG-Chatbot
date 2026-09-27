@@ -39,14 +39,14 @@ async function complete(
 ): Promise<
   { ok: true; text: string } | { ok: false; error: string; fallback: boolean }
 > {
-  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "grok-4.5",
+      model: "openai/gpt-oss-120b",
       temperature: 0.1,
       max_tokens: 700,
       response_format: { type: "json_object" },
@@ -59,8 +59,12 @@ async function complete(
     }
     let detail = "";
     try {
-      const body = (await res.json()) as { error?: unknown; code?: unknown };
-      if (typeof body.error === "string") detail = body.error;
+      const body = (await res.json()) as { error?: { message?: string } | string; code?: unknown };
+      if (typeof body.error === "object" && body.error && "message" in body.error) {
+        detail = body.error.message ?? "";
+      } else if (typeof body.error === "string") {
+        detail = body.error;
+      }
       if (typeof body.code === "string") detail = `${body.code} ${detail}`;
     } catch {
       detail = "";
@@ -70,13 +74,13 @@ async function complete(
       res.status === 402 ||
       res.status === 403 ||
       res.status === 429 ||
-      /credits|spending-limit|subscription/i.test(detail);
+      /credits|spending-limit|subscription|rate limit/i.test(detail);
     return {
       ok: false,
       fallback,
       error: fallback
         ? "Live synthesis is paused. Showing matching passages instead."
-        : `The model returned an error (${res.status}).`,
+        : `The model returned an error (${res.status}): ${detail || "unknown"}`,
     };
   }
   const body = (await res.json()) as {
@@ -116,7 +120,7 @@ function parseModelJson(raw: string): {
 export const askFolio = createServerFn({ method: "POST" })
   .validator((data) => inputSchema.parse(data))
   .handler(async ({ data }): Promise<AskResult> => {
-    const apiKey = process.env.XAI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY || process.env.XAI_API_KEY;
     if (!apiKey) {
       return passagesFrom(data.question, data.excerpts);
     }
