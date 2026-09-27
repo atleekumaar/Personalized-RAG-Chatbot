@@ -12,9 +12,11 @@ export function ThemeToggle() {
     if (saved === "light") {
       setIsDark(false);
       document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
     } else {
       setIsDark(true);
       document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
     }
   }, []);
 
@@ -23,9 +25,11 @@ export function ThemeToggle() {
     setIsDark(next);
     if (next) {
       document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
       localStorage.setItem("folio_theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
       localStorage.setItem("folio_theme", "light");
     }
   };

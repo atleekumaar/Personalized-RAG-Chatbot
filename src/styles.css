@@ -1,52 +1,45 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-:root {
-  --color-bg: #f8fafc;
-  --color-surface: #ffffff;
-  --color-raised: #f1f5f9;
-  --color-fg: #0f172a;
-  --color-muted: #64748b;
-  --color-subtle: #94a3b8;
-  --color-primary: #2563eb;
-  --color-primary-fg: #ffffff;
-  --color-primary-glow: rgba(37, 99, 235, 0.2);
-  --color-border: #e2e8f0;
-  --color-ok: #059669;
-  --color-warn: #d97706;
-  --color-danger: #dc2626;
-  --font-sans: "Inter", "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Newsreader", ui-serif, Georgia, serif;
+@theme {
+  --color-bg: #0b0c0e;
+  --color-surface: #121316;
+  --color-raised: #191b1f;
+  --color-fg: #ecece8;
+  --color-muted: #8e9198;
+  --color-subtle: #6a6d75;
+  --color-primary: #d7dbe3;
+  --color-primary-fg: #0b0c0e;
+  --color-border: #2a2c32;
+  --color-ok: #86a38c;
+  --color-warn: #c4a574;
+  --color-danger: #c98478;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
-  --shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
-  --shadow-border-hover: 0 0 0 1px rgba(0, 0, 0, 0.16);
-  --shadow-glow: 0 0 25px -5px rgba(37, 99, 235, 0.15);
+  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.13);
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --scale-96: 0.96;
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
 }
 
-.dark {
-  --color-bg: #090a0d;
-  --color-surface: #0f1116;
-  --color-raised: #161922;
-  --color-fg: #f0f2f5;
-  --color-muted: #9499a6;
-  --color-subtle: #6b7280;
-  --color-primary: #3b82f6;
+.light {
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-raised: #f1f5f9;
+  --color-fg: #0f172a;
+  --color-muted: #64748b;
+  --color-subtle: #94a3b8;
+  --color-primary: #0f172a;
   --color-primary-fg: #ffffff;
-  --color-primary-glow: rgba(59, 130, 246, 0.25);
-  --color-border: #1f2430;
-  --color-ok: #10b981;
-  --color-warn: #f59e0b;
-  --color-danger: #ef4444;
-  --shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.08);
-  --shadow-border-hover: 0 0 0 1px rgba(255, 255, 255, 0.16);
-  --shadow-glow: 0 0 25px -5px rgba(59, 130, 246, 0.2);
+  --color-border: #e2e8f0;
+  --shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-border-hover: 0 0 0 1px rgba(0, 0, 0, 0.16);
 }
 
 @layer base {
@@ -78,7 +71,7 @@
   }
 
   ::selection {
-    background: rgba(59, 130, 246, 0.35);
+    background: color-mix(in oklab, var(--color-primary) 28%, transparent);
     color: var(--color-fg);
   }
 }
@@ -86,31 +79,22 @@
 @layer utilities {
   .desk-grain {
     background-image:
-      radial-gradient(800px 400px at 50% 0%, var(--color-primary-glow), transparent 70%),
-      radial-gradient(600px 300px at 80% 20%, rgba(139, 92, 246, 0.05), transparent 60%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 40%);
+      radial-gradient(1200px 500px at 50% -10%, rgba(215, 219, 227, 0.05), transparent 55%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 28%);
+  }
+
+  .light .desk-grain {
+    background-image:
+      radial-gradient(1200px 500px at 50% -10%, rgba(15, 23, 42, 0.03), transparent 55%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.01), transparent 28%);
   }
 
   .hairline {
     box-shadow: var(--shadow-border);
   }
 
-  .hairline-hover:hover {
-    box-shadow: var(--shadow-border-hover);
-  }
-
-  .glow-blue {
-    box-shadow: var(--shadow-glow);
-  }
-
   .safe-pad-b {
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-  }
-
-  .gradient-text {
-    background: linear-gradient(135deg, var(--color-fg) 0%, var(--color-muted) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
   }
 
   .shimmer-text {
