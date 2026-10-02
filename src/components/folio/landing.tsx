@@ -161,9 +161,9 @@ export function Landing({ onUpload, onSample, onAddDoc, busy }: LandingProps) {
             </form>
           ) : null}
 
-          <div className="mt-6 flex items-center gap-2 text-2xs text-subtle">
-            <span>Designed & Developed by <strong className="text-fg font-medium">Atlee Kumaar</strong></span>
-          </div>
+          <p className="mt-6 text-2xs text-subtle">
+            Answers are grounded strictly in your uploaded documents and web sources.
+          </p>
         </div>
 
         <PaperStack />
@@ -197,7 +197,7 @@ function PaperStack() {
         </div>
         <div className="mt-auto flex items-center justify-between text-2xs text-subtle">
           <span>Supported: PDF · DOCX · URL · TXT</span>
-          <span className="font-medium text-fg/70">Atlee Kumaar</span>
+          <span className="font-medium text-fg/70">Verified Knowledge</span>
         </div>
       </div>
     </div>

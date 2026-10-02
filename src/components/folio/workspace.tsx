@@ -36,8 +36,8 @@ export function Workspace({
   const sessions = useFolio((s) => s.sessions);
 
   return (
-    <div className="flex min-h-0 flex-1">
-      <aside className="hidden w-80 shrink-0 flex-col border-r border-border md:flex">
+    <div className="flex min-h-0 flex-1 h-full overflow-hidden">
+      <aside className="hidden w-80 shrink-0 flex-col border-r border-border md:flex h-full min-h-0 overflow-hidden">
         {/* Sidebar Nav Tabs */}
         <div className="flex border-b border-border bg-surface px-3 pt-2">
           <button
@@ -91,7 +91,7 @@ export function Workspace({
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col h-full min-h-0 overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-4 py-2 md:hidden">
           <div className="flex items-center gap-2">
             <Button

@@ -79,7 +79,7 @@ function Home() {
 
   return (
     <div
-      className="desk-grain relative flex min-h-dvh flex-col bg-bg text-fg"
+      className="desk-grain relative flex h-dvh flex-col bg-bg text-fg overflow-hidden"
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
@@ -107,7 +107,7 @@ function Home() {
           {/* Theme Toggle Button */}
           <ThemeToggle />
 
-          {/* Top Header Watermark Badge */}
+          {/* Single Header Watermark Badge */}
           <div className="flex items-center gap-1.5 rounded-full border border-border bg-raised/80 px-3 py-1 text-2xs text-muted shadow-sm backdrop-blur">
             <span className="size-1.5 rounded-full bg-ok animate-pulse" />
             <span>by <strong className="text-fg font-medium">Atlee Kumaar</strong></span>
@@ -125,12 +125,14 @@ function Home() {
       />
 
       {docs.length === 0 ? (
-        <Landing
-          onUpload={openPicker}
-          onSample={handleSample}
-          onAddDoc={addDoc}
-          busy={ingesting}
-        />
+        <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+          <Landing
+            onUpload={openPicker}
+            onSample={handleSample}
+            onAddDoc={addDoc}
+            busy={ingesting}
+          />
+        </div>
       ) : (
         <Workspace
           docs={docs}
@@ -144,12 +146,6 @@ function Home() {
           onOpenLibrary={setLibraryOpen}
         />
       )}
-
-      {/* Floating Bottom-Right Corner Watermark */}
-      <div className="fixed bottom-3 right-3 z-30 pointer-events-none hidden sm:flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface/90 px-2.5 py-1 text-2xs text-subtle shadow-md backdrop-blur">
-        <Sparkles className="size-3 text-primary" />
-        <span>Personalized RAG · <span className="font-semibold text-fg/80">Atlee Kumaar</span></span>
-      </div>
 
       {dragging ? (
         <div

@@ -1,4 +1,4 @@
-import { ArrowUp, Check, Copy, Files, Mic, MicOff, ShieldAlert, ShieldCheck, Sparkles, User, Volume2, VolumeX } from "lucide-react";
+import { ArrowUp, Check, Copy, ExternalLink, FileText, Files, Mic, MicOff, ShieldAlert, ShieldCheck, Sparkles, User, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ export function ChatPanel() {
   const patchMessage = useFolio((s) => s.patchMessage);
   const setAsking = useFolio((s) => s.setAsking);
   const [draft, setDraft] = useState("");
+  const [selectedCitation, setSelectedCitation] = useState<ChatCitation | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
   const { isListening, isSupported: speechSupported, toggleListening } = useSpeechToText((text) => {
@@ -131,7 +132,7 @@ export function ChatPanel() {
   const empty = messages.length === 0;
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8">
         {empty ? (
           <EmptyChat
@@ -148,6 +149,7 @@ export function ChatPanel() {
                 pending={asking}
                 speaking={speakingId === message.id}
                 onSpeak={() => speak(message.id, message.content)}
+                onSelectCitation={setSelectedCitation}
               />
             ))}
           </ol>
@@ -156,7 +158,7 @@ export function ChatPanel() {
 
       <form
         onSubmit={onSubmit}
-        className="safe-pad-b border-t border-border bg-surface/60 backdrop-blur-md px-4 py-3 sm:px-8"
+        className="safe-pad-b shrink-0 border-t border-border bg-surface/60 backdrop-blur-md px-4 py-3 sm:px-8"
       >
         <div className="mx-auto flex max-w-2xl items-end gap-2 rounded-2xl bg-surface p-2 hairline shadow-lg border border-border/80 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/30 transition-all">
           {speechSupported ? (
@@ -196,10 +198,18 @@ export function ChatPanel() {
           </Button>
         </div>
         <div className="mx-auto mt-2 max-w-2xl flex items-center justify-between px-1 text-2xs text-subtle">
-          <span>Answers retrieved strictly from library</span>
-          <span className="hidden sm:inline">Folio · Atlee Kumaar</span>
+          <span>Answers retrieved strictly from your uploaded sources</span>
+          <span>Zero Hallucination</span>
         </div>
       </form>
+
+      {/* Interactive Source Pop-up Modal */}
+      {selectedCitation ? (
+        <SourceModal
+          citation={selectedCitation}
+          onClose={() => setSelectedCitation(null)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -222,7 +232,7 @@ function EmptyChat({
       <p className="mt-3 font-display text-3xl font-medium text-fg">Your library is ready.</p>
       <p className="mt-2 text-sm leading-relaxed text-muted">
         Ask any question via text or voice. Folio will search matching passages and stream
-        answers grounded only in your sources.
+        answers grounded only in your sources. Click on any verified source to see the exact paragraph!
       </p>
       {suggestions.length > 0 ? (
         <ul className="mt-6 flex w-full flex-col gap-2.5">
@@ -250,11 +260,13 @@ function MessageBubble({
   pending,
   speaking,
   onSpeak,
+  onSelectCitation,
 }: {
   message: ChatMessage;
   pending: boolean;
   speaking?: boolean;
   onSpeak?: () => void;
+  onSelectCitation: (citation: ChatCitation) => void;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -347,7 +359,11 @@ function MessageBubble({
               ) : null}
             </div>
 
-            <AnswerBody text={message.content} citations={message.citations ?? []} />
+            <AnswerBody
+              text={message.content}
+              citations={message.citations ?? []}
+              onSelectCitation={onSelectCitation}
+            />
 
             {message.mode === "passages" && message.found ? (
               <p className="mt-3 text-xs text-subtle">
@@ -356,7 +372,10 @@ function MessageBubble({
             ) : null}
 
             {message.citations && message.citations.length > 0 && message.found !== false ? (
-              <CitationList citations={message.citations} />
+              <CitationList
+                citations={message.citations}
+                onSelectCitation={onSelectCitation}
+              />
             ) : null}
           </>
         )}
@@ -368,21 +387,27 @@ function MessageBubble({
 function AnswerBody({
   text,
   citations,
+  onSelectCitation,
 }: {
   text: string;
   citations: ChatCitation[];
+  onSelectCitation: (citation: ChatCitation) => void;
 }) {
   const paragraphs = text.split(/\n{2,}/).filter(Boolean);
   return (
     <div className="space-y-3 text-sm leading-relaxed text-fg">
       {paragraphs.map((para, i) => (
-        <p key={i}>{renderCited(para, citations)}</p>
+        <p key={i}>{renderCited(para, citations, onSelectCitation)}</p>
       ))}
     </div>
   );
 }
 
-function renderCited(text: string, citations: ChatCitation[]) {
+function renderCited(
+  text: string,
+  citations: ChatCitation[],
+  onSelectCitation: (citation: ChatCitation) => void,
+) {
   const parts = text.split(/(\[\d+\])/g);
   return parts.map((part, i) => {
     const match = part.match(/^\[(\d+)\]$/);
@@ -390,53 +415,154 @@ function renderCited(text: string, citations: ChatCitation[]) {
     const n = Number(match[1]);
     const citation = citations.find((c) => c.n === n);
     return (
-      <sup
+      <button
         key={i}
+        type="button"
+        onClick={() => citation && onSelectCitation(citation)}
         className={cn(
-          "ml-0.5 inline-flex size-4 translate-y-px items-center justify-center rounded-sm bg-bg text-2xs font-medium text-primary tabular-nums border border-border",
+          "mx-0.5 inline-flex size-5 translate-y-px items-center justify-center rounded bg-primary/15 text-2xs font-semibold text-primary tabular-nums border border-primary/30 hover:bg-primary hover:text-primary-fg transition-all cursor-pointer shadow-xs",
         )}
-        title={citation ? citation.source : `Source ${n}`}
+        title={citation ? `Click to view source excerpt from ${citation.source}` : `Source ${n}`}
       >
         {n}
-      </sup>
+      </button>
     );
   });
 }
 
-function CitationList({ citations }: { citations: ChatCitation[] }) {
-  const [open, setOpen] = useState<number | null>(citations[0]?.n ?? null);
+function CitationList({
+  citations,
+  onSelectCitation,
+}: {
+  citations: ChatCitation[];
+  onSelectCitation: (citation: ChatCitation) => void;
+}) {
   return (
     <div className="mt-4 border-t border-border/60 pt-3">
-      <p className="text-2xs font-medium tracking-[0.14em] text-subtle uppercase">
-        Verified Sources
-      </p>
-      <ul className="mt-2 space-y-2">
-        {citations.map((c) => {
-          const expanded = open === c.n;
-          return (
-            <li key={c.n}>
-              <button
-                type="button"
-                onClick={() => setOpen(expanded ? null : c.n)}
-                className="flex min-h-10 w-full items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-left text-xs text-muted transition-colors duration-150 hover:bg-bg hover:text-fg border border-transparent hover:border-border"
-              >
-                <span className="min-w-0 truncate">
-                  <span className="mr-2 font-semibold text-primary tabular-nums">[{c.n}]</span>
-                  {c.source}
-                  {c.page ? ` · p. ${c.page}` : ""}
-                  {c.heading ? ` · ${c.heading}` : ""}
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-2xs font-semibold tracking-[0.14em] text-subtle uppercase">
+          Verified Sources ({citations.length})
+        </p>
+        <span className="text-2xs text-muted">Click to view source excerpt</span>
+      </div>
+      <ul className="space-y-1.5">
+        {citations.map((c) => (
+          <li key={c.n}>
+            <button
+              type="button"
+              onClick={() => onSelectCitation(c)}
+              className="group flex min-h-10 w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-xs text-muted transition-all duration-150 bg-bg/50 hover:bg-bg hover:text-fg border border-border/60 hover:border-primary/50 shadow-xs"
+            >
+              <span className="min-w-0 truncate flex items-center gap-2">
+                <span className="flex size-5 items-center justify-center rounded bg-primary/10 text-primary font-semibold text-2xs tabular-nums shrink-0">
+                  {c.n}
                 </span>
-                <span className="shrink-0 text-2xs text-subtle">{expanded ? "Hide" : "Show"}</span>
-              </button>
-              {expanded ? (
-                <blockquote className="mt-1.5 rounded-lg bg-bg/90 border-l-2 border-primary px-3 py-2 text-xs leading-relaxed text-muted">
-                  {c.quote}
-                </blockquote>
-              ) : null}
-            </li>
-          );
-        })}
+                <span className="truncate font-medium text-fg">{c.source}</span>
+                {c.page ? <span className="text-2xs text-subtle">· p. {c.page}</span> : null}
+                {c.heading ? <span className="truncate text-2xs text-subtle">· {c.heading}</span> : null}
+              </span>
+              <span className="shrink-0 flex items-center gap-1 text-2xs font-medium text-primary group-hover:underline">
+                View Source <ExternalLink className="size-3" />
+              </span>
+            </button>
+          </li>
+        ))}
       </ul>
+    </div>
+  );
+}
+
+function SourceModal({
+  citation,
+  onClose,
+}: {
+  citation: ChatCitation;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  function copyQuote() {
+    void navigator.clipboard.writeText(citation.quote);
+    setCopied(true);
+    toast.success("Source excerpt copied");
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg/80 backdrop-blur-sm animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-2xl bg-surface border border-border shadow-2xl p-6 relative animate-in zoom-in-95 duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between border-b border-border/60 pb-3.5">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="size-9 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0 text-primary mt-0.5">
+              <FileText className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge tone="ok">Source [{citation.n}]</Badge>
+                {citation.page ? (
+                  <span className="text-xs text-muted font-medium">Page {citation.page}</span>
+                ) : null}
+              </div>
+              <h3 className="text-sm font-semibold text-fg mt-1 truncate" title={citation.source}>
+                {citation.source}
+              </h3>
+              {citation.heading ? (
+                <p className="text-xs text-subtle truncate mt-0.5">{citation.heading}</p>
+              ) : null}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="size-8 rounded-lg text-subtle hover:text-fg hover:bg-raised transition-colors flex items-center justify-center"
+            aria-label="Close modal"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-2xs font-semibold tracking-wider text-subtle uppercase mb-1.5">
+            Exact Document Excerpt (Retrieved Passage)
+          </p>
+          <div className="rounded-xl bg-raised p-4 border border-border/70 max-h-64 overflow-y-auto">
+            <p className="text-sm leading-relaxed text-fg select-text whitespace-pre-wrap">
+              "{citation.quote}"
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex items-center justify-between">
+          <span className="text-2xs text-subtle">Verified Grounded Source</span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={copyQuote}
+              className="h-8 text-xs"
+            >
+              {copied ? <Check className="size-3.5 mr-1 text-ok" /> : <Copy className="size-3.5 mr-1" />}
+              Copy Excerpt
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={onClose}
+              className="h-8 text-xs"
+            >
+              Done
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -447,6 +573,6 @@ function excerptToCitation(excerpt: Excerpt): ChatCitation {
     source: excerpt.source,
     page: excerpt.page,
     heading: excerpt.heading,
-    quote: excerpt.text.length > 280 ? `${excerpt.text.slice(0, 277)}…` : excerpt.text,
+    quote: excerpt.text,
   };
 }
