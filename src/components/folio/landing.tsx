@@ -161,9 +161,10 @@ export function Landing({ onUpload, onSample, onAddDoc, busy }: LandingProps) {
             </form>
           ) : null}
 
-          <p className="mt-6 text-2xs text-subtle">
-            Answers are grounded strictly in your uploaded documents and web sources.
-          </p>
+          <div className="mt-6 flex items-center justify-between text-xs text-subtle border-t border-border/50 pt-3">
+            <span>Answers grounded strictly in your documents</span>
+            <span>Crafted by <strong className="text-fg font-medium">Atlee Kumaar</strong></span>
+          </div>
         </div>
 
         <PaperStack />

@@ -107,10 +107,10 @@ function Home() {
           {/* Theme Toggle Button */}
           <ThemeToggle />
 
-          {/* Single Header Watermark Badge */}
-          <div className="flex items-center gap-1.5 rounded-full border border-border bg-raised/80 px-3 py-1 text-2xs text-muted shadow-sm backdrop-blur">
-            <span className="size-1.5 rounded-full bg-ok animate-pulse" />
-            <span>by <strong className="text-fg font-medium">Atlee Kumaar</strong></span>
+          {/* Header Watermark Badge */}
+          <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-xs text-fg shadow-xs">
+            <span className="size-2 rounded-full bg-ok animate-pulse" />
+            <span>by <strong className="font-semibold text-primary">Atlee Kumaar</strong></span>
           </div>
         </div>
       </header>
